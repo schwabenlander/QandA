@@ -1,13 +1,15 @@
 import React from 'react';
 import { QuestionList } from './QuestionList';
 import { getUnansweredQuestions } from './QuestionData';
+import { Page } from './Page';
+import { PageTile } from './PageTitle';
 
 export const Homepage = () => (
-  <div>
+  <Page>
     <div>
-      <h2>Unanswered Questions</h2>
+      <PageTile>Unanswered Questions</PageTile>
       <button>Ask a question</button>
     </div>
     <QuestionList data={getUnansweredQuestions()} />
-  </div>
+  </Page>
 );
