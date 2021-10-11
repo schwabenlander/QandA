@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from './Header.module.css';
 import { UserIcon } from './Icons';
 
 export const Header = () => {
@@ -7,7 +8,7 @@ export const Header = () => {
   };
 
   return (
-    <div>
+    <div className={styles.container}>
       <a href="./">Q &amp; A</a>
       <input
         type="text"
