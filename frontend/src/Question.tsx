@@ -2,7 +2,8 @@
 import React from 'react';
 import { QuestionData } from './QuestionData';
 import { css } from '@emotion/react';
-import { gray2, gray3 } from './Styles';
+import { gray2, gray3, primary1, primary2 } from './Styles';
+import { Link } from 'react-router-dom';
 
 interface Props {
   data: QuestionData;
@@ -21,7 +22,18 @@ export const Question = ({ data, showContent = true }: Props) => (
         font-size: 22px;
       `}
     >
-      {data.title}
+      <Link
+        css={css`
+          text-decoration: none;
+          color: ${primary2};
+          :hover {
+            color: ${primary1};
+          }
+        `}
+        to={`questions/${data.questionId}`}
+      >
+        {data.title}
+      </Link>
     </div>
     {showContent && (
       <div
