@@ -2,7 +2,15 @@
 import React from 'react';
 import { UserIcon } from './Icons';
 import { css } from '@emotion/react';
-import { fontFamily, fontSize, primary1, gray2, gray5 } from './Styles';
+import {
+  fontFamily,
+  fontSize,
+  primary1,
+  primary2,
+  gray2,
+  gray5,
+} from './Styles';
+import { Link } from 'react-router-dom';
 
 export const Header = () => {
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,18 +34,20 @@ export const Header = () => {
         box-shadow: 0 4px 7px 0 rgba(110, 112, 114, 0.22);
       `}
     >
-      <a
-        href="./"
+      <Link
+        to="/"
         css={css`
           font-size: 24px;
           font-weight: bold;
-          color: ${primary1};
+          color: ${primary2};
           text-decoration: none;
-          text-shadow: 2px 2px 3px #ccc;
+          :hover {
+            color: ${primary1};
+          }
         `}
       >
         Q&amp;A
-      </a>
+      </Link>
       <input
         type="text"
         placeholder="Search..."
@@ -49,17 +59,18 @@ export const Header = () => {
           padding: 8px 10px;
           border: 2px solid ${gray5};
           border-radius: 4px;
-          color: ${gray2};
+          color: ${primary1};
           background-color: #fff;
           width: 16em;
           height: 30px;
           :focus {
             outline-color: ${primary1};
+            box-shadow: 0 4px 7px 0 rgba(110, 112, 114, 0.22);
           }
         `}
       />
-      <a
-        href="./signin"
+      <Link
+        to="signin"
         css={css`
           font-family: ${fontFamily};
           font-size: ${fontSize};
@@ -71,6 +82,9 @@ export const Header = () => {
           :focus {
             outline-color: ${gray5};
           }
+          :hover {
+            text-decoration: underline;
+          }
           span {
             margin-left: 7px;
           }
@@ -78,7 +92,7 @@ export const Header = () => {
       >
         <UserIcon />
         <span>Sign In</span>
-      </a>
+      </Link>
     </div>
   );
 };

@@ -28,6 +28,8 @@ export const PrimaryButton = styled.button`
   cursor: pointer;
   :hover {
     background-color: ${primary1};
+    border-color: ${primary1};
+    box-shadow: 0 3px 5px 0 rgba(0, 0, 0, 0.16);
   }
   :focus {
     outline-color: ${primary2};

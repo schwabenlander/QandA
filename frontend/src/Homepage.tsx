@@ -6,8 +6,10 @@ import { Page } from './Page';
 import { PageTile } from './PageTitle';
 import { css } from '@emotion/react';
 import { PrimaryButton } from './Styles';
+import { useNavigate } from 'react-router-dom';
 
 export const Homepage = () => {
+  const navigate = useNavigate();
   const [questions, setQuestions] = React.useState<QuestionData[]>([]);
   const [questionsLoading, setQuestionsLoading] = React.useState(true);
 
@@ -21,7 +23,7 @@ export const Homepage = () => {
   }, []);
 
   const handleAskQuestionClick = () => {
-    console.log('TODO: - navigate to the AskPage');
+    navigate('ask');
   };
 
   return (
