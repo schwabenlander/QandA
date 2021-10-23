@@ -1,8 +1,11 @@
+/** @jsxImportSource @emotion/react */
 import React from 'react';
 import { QuestionList } from './QuestionList';
 import { getUnansweredQuestions, QuestionData } from './QuestionData';
 import { Page } from './Page';
 import { PageTile } from './PageTitle';
+import { css } from '@emotion/react';
+import { PrimaryButton } from './Styles';
 
 export const Homepage = () => {
   const [questions, setQuestions] = React.useState<QuestionData[]>([]);
@@ -23,9 +26,17 @@ export const Homepage = () => {
 
   return (
     <Page>
-      <div>
+      <div
+        css={css`
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        `}
+      >
         <PageTile>Unanswered Questions</PageTile>
-        <button onClick={handleAskQuestionClick}>Ask a question</button>
+        <PrimaryButton onClick={handleAskQuestionClick}>
+          Ask a question
+        </PrimaryButton>
       </div>
       {questionsLoading ? (
         <div>Loading...</div>

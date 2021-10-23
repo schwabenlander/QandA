@@ -1,6 +1,8 @@
+/** @jsxImportSource @emotion/react */
 import React from 'react';
-import styles from './Header.module.css';
 import { UserIcon } from './Icons';
+import { css } from '@emotion/react';
+import { fontFamily, fontSize, primary1, gray2, gray5 } from './Styles';
 
 export const Header = () => {
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -8,14 +10,72 @@ export const Header = () => {
   };
 
   return (
-    <div className={styles.container}>
-      <a href="./">Q &amp; A</a>
+    <div
+      css={css`
+        position: fixed;
+        box-sizing: border-box;
+        top: 0;
+        width: 100%;
+        display: flex;
+        align-self: auto;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 20px;
+        background-color: #fff;
+        border-bottom: 1px solid ${gray5};
+        box-shadow: 0 4px 7px 0 rgba(110, 112, 114, 0.22);
+      `}
+    >
+      <a
+        href="./"
+        css={css`
+          font-size: 24px;
+          font-weight: bold;
+          color: ${primary1};
+          text-decoration: none;
+          text-shadow: 2px 2px 3px #ccc;
+        `}
+      >
+        Q&amp;A
+      </a>
       <input
         type="text"
         placeholder="Search..."
         onChange={handleSearchInputChange}
+        css={css`
+          box-sizing: border-box;
+          font-family: ${fontFamily};
+          font-size: ${fontSize};
+          padding: 8px 10px;
+          border: 2px solid ${gray5};
+          border-radius: 4px;
+          color: ${gray2};
+          background-color: #fff;
+          width: 16em;
+          height: 30px;
+          :focus {
+            outline-color: ${primary1};
+          }
+        `}
       />
-      <a href="./signin">
+      <a
+        href="./signin"
+        css={css`
+          font-family: ${fontFamily};
+          font-size: ${fontSize};
+          padding: 5px 10px;
+          background-color: transparent;
+          color: ${gray2};
+          text-decoration: none;
+          cursor: pointer;
+          :focus {
+            outline-color: ${gray5};
+          }
+          span {
+            margin-left: 7px;
+          }
+        `}
+      >
         <UserIcon />
         <span>Sign In</span>
       </a>
