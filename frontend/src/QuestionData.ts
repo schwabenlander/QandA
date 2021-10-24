@@ -15,16 +15,27 @@ export interface AnswerData {
 }
 
 export const getUnansweredQuestions = async (): Promise<QuestionData[]> => {
-  await wait(1000);
+  await wait(600);
   return questions.filter((q) => q.answers.length === 0);
 };
 
 export const getQuestion = async (
   questionId: number,
 ): Promise<QuestionData | null> => {
-  await wait(1000);
+  await wait(600);
   const results = questions.filter((q) => q.questionId === questionId);
   return results.length === 0 ? null : results[0];
+};
+
+export const searchQuestions = async (
+  criteria: string,
+): Promise<QuestionData[]> => {
+  await wait(600);
+  return questions.filter(
+    (q) =>
+      q.title.toLowerCase().indexOf(criteria.toLowerCase()) >= 0 ||
+      q.content.toLowerCase().indexOf(criteria.toLowerCase()) >= 0,
+  );
 };
 
 const wait = (ms: number): Promise<void> => {

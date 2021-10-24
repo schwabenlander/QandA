@@ -11,7 +11,7 @@ interface Props {
 export const Answer = ({ data }: Props) => (
   <div
     css={css`
-      padding: 10px 0;
+      padding: 0px 10px 10px 0px;
     `}
   >
     <div
