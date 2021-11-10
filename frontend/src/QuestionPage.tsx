@@ -1,14 +1,34 @@
 /** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react';
+import {
+  gray3,
+  gray6,
+  Fieldset,
+  FieldContainer,
+  FieldLabel,
+  FieldTextArea,
+  FormButtonContainer,
+  PrimaryButton,
+  FieldError,
+  SubmissionSuccess,
+} from './Styles';
+
 import React from 'react';
 import { Page } from './Page';
 import { useParams } from 'react-router-dom';
-import { QuestionData, getQuestion } from './QuestionData';
-import { css } from '@emotion/react';
-import { gray3, gray6 } from './Styles';
+import { QuestionData, getQuestion, postAnswer } from './QuestionData';
 import { AnswerList } from './AnswerList';
+
+import { useForm } from 'react-hook-form';
+
+type FormData = {
+  content: string;
+};
 
 export const QuestionPage = () => {
   const [question, setQuestion] = React.useState<QuestionData | null>(null);
+  const [successfullySubmitted, setSuccessfullySubmitted] =
+    React.useState(false);
 
   const { questionId } = useParams();
 
@@ -17,17 +37,30 @@ export const QuestionPage = () => {
       const foundQuestion = await getQuestion(questionId);
       setQuestion(foundQuestion);
     };
-
     if (questionId) {
       doGetQuestion(Number(questionId));
     }
   }, [questionId]);
 
+  const { register, errors, handleSubmit, formState } = useForm<FormData>({
+    mode: 'onBlur',
+  });
+
+  const submitForm = async (data: FormData) => {
+    const result = await postAnswer({
+      questionId: question!.questionId,
+      content: data.content,
+      userName: 'Fred',
+      created: new Date(),
+    });
+    setSuccessfullySubmitted(result ? true : false);
+  };
+
   return (
     <Page>
       <div
         css={css`
-          background-color: #fff;
+          background-color: white;
           padding: 15px 20px 20px 20px;
           border-radius: 4px;
           border: 1px solid ${gray6};
@@ -38,7 +71,7 @@ export const QuestionPage = () => {
           css={css`
             font-size: 19px;
             font-weight: bold;
-            margin: 10px 0 5px;
+            margin: 10px 0px 5px;
           `}
         >
           {question === null ? '' : question.title}
@@ -47,8 +80,8 @@ export const QuestionPage = () => {
           <React.Fragment>
             <p
               css={css`
-                margin-top: 0;
-                background-color: #fff;
+                margin-top: 0px;
+                background-color: white;
               `}
             >
               {question.content}
@@ -60,11 +93,51 @@ export const QuestionPage = () => {
                 color: ${gray3};
               `}
             >
-              {`Asked by ${question.userName} on 
-                    ${question.created.toLocaleDateString()}
-                    ${question.created.toLocaleTimeString()}`}
+              {`Asked by ${question.userName} on
+  ${question.created.toLocaleDateString()} 
+  ${question.created.toLocaleTimeString()}`}
             </div>
             <AnswerList data={question.answers} />
+            <form
+              onSubmit={handleSubmit(submitForm)}
+              css={css`
+                margin-top: 20px;
+              `}
+            >
+              <Fieldset
+                disabled={formState.isSubmitting || successfullySubmitted}
+              >
+                <FieldContainer>
+                  <FieldLabel htmlFor="content">Your Answer</FieldLabel>
+                  <FieldTextArea
+                    id="content"
+                    name="content"
+                    ref={register({
+                      required: true,
+                      minLength: 50,
+                    })}
+                  />
+                  {errors.content && errors.content.type === 'required' && (
+                    <FieldError>You must enter the answer</FieldError>
+                  )}
+                  {errors.content && errors.content.type === 'minLength' && (
+                    <FieldError>
+                      The answer must be at least 50 characters
+                    </FieldError>
+                  )}
+                </FieldContainer>
+                <FormButtonContainer>
+                  <PrimaryButton type="submit">
+                    Submit Your Answer
+                  </PrimaryButton>
+                </FormButtonContainer>
+                {successfullySubmitted && (
+                  <SubmissionSuccess>
+                    Your answer was successfully submitted
+                  </SubmissionSuccess>
+                )}
+              </Fieldset>
+            </form>
           </React.Fragment>
         )}
       </div>
