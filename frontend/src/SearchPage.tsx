@@ -1,22 +1,34 @@
 /** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react';
+import { useSearchParams } from 'react-router-dom';
+import { QuestionList } from './QuestionList';
+import { searchQuestions } from './QuestionData';
+
 import React from 'react';
 import { Page } from './Page';
-import { useSearchParams } from 'react-router-dom';
-import { QuestionData, searchQuestions } from './QuestionData';
-import { css } from '@emotion/react';
-import { QuestionList } from './QuestionList';
+
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  AppState,
+  searchingQuestionsAction,
+  searchedQuestionsAction,
+} from './Store';
 
 export const SearchPage = () => {
-  const [searchParams] = useSearchParams();
-  const [questions, setQuestions] = React.useState<QuestionData[]>([]);
+  const dispatch = useDispatch();
+  const questions = useSelector((state: AppState) => state.questions.searched);
 
+  const [searchParams] = useSearchParams();
   const search = searchParams.get('criteria') || '';
+
   React.useEffect(() => {
     const doSearch = async (criteria: string) => {
+      dispatch(searchingQuestionsAction());
       const foundResults = await searchQuestions(criteria);
-      setQuestions(foundResults);
+      dispatch(searchedQuestionsAction(foundResults));
     };
     doSearch(search);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
   return (
@@ -26,8 +38,7 @@ export const SearchPage = () => {
           css={css`
             font-size: 16px;
             font-style: italic;
-            margin-top: 0;
-            text-align: center;
+            margin-top: 0px;
           `}
         >
           for "{search}"

@@ -7,7 +7,6 @@ interface QuestionsState {
   readonly viewing: QuestionData | null;
   readonly searched: QuestionData[];
 }
-
 export interface AppState {
   readonly questions: QuestionsState;
 }
@@ -22,10 +21,11 @@ const initialQuestionState: QuestionsState = {
 export const GETTINGUNANSWEREDQUESTIONS = 'GettingUnansweredQuestions';
 
 export const gettingUnansweredQuestionsAction = () =>
-  ({ type: GETTINGUNANSWEREDQUESTIONS } as const);
+  ({
+    type: GETTINGUNANSWEREDQUESTIONS,
+  } as const);
 
 export const GOTUNANSWEREDQUESTIONS = 'GotUnansweredQuestions';
-
 export const gotUnansweredQuestionsAction = (questions: QuestionData[]) =>
   ({
     type: GOTUNANSWEREDQUESTIONS,
@@ -33,14 +33,12 @@ export const gotUnansweredQuestionsAction = (questions: QuestionData[]) =>
   } as const);
 
 export const GETTINGQUESTION = 'GettingQuestion';
-
 export const gettingQuestionAction = () =>
   ({
     type: GETTINGQUESTION,
   } as const);
 
 export const GOTQUESTION = 'GotQuestion';
-
 export const gotQuestionAction = (question: QuestionData | null) =>
   ({
     type: GOTQUESTION,
@@ -48,14 +46,12 @@ export const gotQuestionAction = (question: QuestionData | null) =>
   } as const);
 
 export const SEARCHINGQUESTIONS = 'SearchingQuestions';
-
 export const searchingQuestionsAction = () =>
   ({
     type: SEARCHINGQUESTIONS,
   } as const);
 
 export const SEARCHEDQUESTIONS = 'SearchedQuestions';
-
 export const searchedQuestionsAction = (questions: QuestionData[]) =>
   ({
     type: SEARCHEDQUESTIONS,
@@ -71,7 +67,7 @@ type QuestionsActions =
   | ReturnType<typeof searchedQuestionsAction>;
 
 const questionsReducer = (
-  state: QuestionsState = initialQuestionState,
+  state = initialQuestionState,
   action: QuestionsActions,
 ) => {
   switch (action.type) {
@@ -98,14 +94,14 @@ const questionsReducer = (
     case GOTQUESTION: {
       return {
         ...state,
-        view: action.question,
+        viewing: action.question,
         loading: false,
       };
     }
     case SEARCHINGQUESTIONS: {
       return {
         ...state,
-        seached: [],
+        searched: [],
         loading: true,
       };
     }
@@ -121,7 +117,9 @@ const questionsReducer = (
   return state;
 };
 
-const rootReducer = combineReducers<AppState>({ questions: questionsReducer });
+const rootReducer = combineReducers<AppState>({
+  questions: questionsReducer,
+});
 
 export function configureStore(): Store<AppState> {
   const store = createStore(rootReducer, undefined);
