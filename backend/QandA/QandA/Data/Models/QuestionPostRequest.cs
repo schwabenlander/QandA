@@ -1,3 +1,10 @@
 ﻿namespace QandA.Data.Models;
 
-public record QuestionPostRequest(string Title, string Content, string UserId, string UserName, DateTime Created);
+public class QuestionPostRequest
+{
+    public string Title { get; set; }
+    public string Content { get; set; }
+    public string UserId { get; set; }
+    public string UserName { get; set; }
+    public DateTime Created { get; set; }
+}

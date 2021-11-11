@@ -9,7 +9,10 @@ public class DataRepository : IDataRepository
 
     public DataRepository(IConfiguration configuration)
     {
-        _connectionString = configuration["ConnectionStrings.DefaultConnection"];
+        if (configuration == null)
+            throw new ArgumentNullException(nameof(configuration));
+
+        _connectionString = configuration.GetConnectionString("DefaultConnection");
     }
 
     public void DeleteQuestion(int questionId)
@@ -43,25 +46,21 @@ public class DataRepository : IDataRepository
 
         if (question == null) return null;
 
-        var answers = connection.Query<AnswerGetResponse>(
+       question.Answers = connection.Query<AnswerGetResponse>(
             @"EXEC dbo.Answer_Get_ByQuestionId @QuestionId = @QuestionId",
             new { QuestionId = questionId });
 
-        return new QuestionGetSingleResponse(question.QuestionId,
-            question.Title,
-            question.Content,
-            question.UserName,
-            question.UserId,
-            question.Created,
-            answers);
+        return question;
     }
 
     public IEnumerable<QuestionGetManyResponse> GetQuestions()
     {
-        using var connection = new SqlConnection(_connectionString);
-        connection.Open();
+        using (var connection = new SqlConnection(_connectionString))
+        {
+            connection.Open();
 
-        return connection.Query<QuestionGetManyResponse>(@"EXEC dbo.Question_GetMany");
+            return connection.Query<QuestionGetManyResponse>(@"EXEC dbo.Question_GetMany");
+        }
     }
 
     public IEnumerable<QuestionGetManyResponse> GetQuestionsBySearch(string search)
