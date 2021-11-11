@@ -1,5 +1,7 @@
-var builder = WebApplication.CreateBuilder(args);
+using DbUp;
+using System.Reflection;
 
+var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -8,6 +10,21 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+var connectionString = app.Configuration.GetConnectionString("DefaultConnection");
+
+EnsureDatabase.For.SqlDatabase(connectionString);
+
+var upgrader = DeployChanges.To
+                .SqlDatabase(connectionString)
+                .WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
+                .WithTransaction()
+                .Build();
+
+if (upgrader.IsUpgradeRequired())
+{
+    upgrader.PerformUpgrade();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
