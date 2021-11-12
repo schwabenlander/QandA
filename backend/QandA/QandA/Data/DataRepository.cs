@@ -81,7 +81,7 @@ public class DataRepository : IDataRepository
         return connection.Query<QuestionGetManyResponse>(@"EXEC dbo.Question_GetUnanswered");
     }
 
-    public AnswerGetResponse PostAnswer(AnswerPostRequest answer)
+    public AnswerGetResponse PostAnswer(AnswerPostFullRequest answer)
     {
         using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -94,7 +94,7 @@ public class DataRepository : IDataRepository
           answer);
     }
 
-    public QuestionGetSingleResponse PostQuestion(QuestionPostRequest question)
+    public QuestionGetSingleResponse PostQuestion(QuestionPostFullRequest question)
     {
         using var connection = new SqlConnection(_connectionString);
         connection.Open();
