@@ -1,16 +1,35 @@
 using DbUp;
-using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using QandA.Authorization;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-// Add services to the container.
+string domain = $"https://{builder.Configuration["Auth0:Domain"]}/";
 
+// Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IDataRepository, DataRepository>();
 builder.Services.AddSingleton<IQuestionCache, QuestionCache>();
+builder.Services.AddHttpClient();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme =
+        JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme =
+        JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.Authority = domain;
+    options.Audience = builder.Configuration["Auth0:Audience"];
+});
+builder.Services.AddAuthorization(options =>
+                  options.AddPolicy("MustBeQuestionAuthor", policy =>
+                    policy.Requirements.Add(new MustBeQuestionAuthorRequirement())));
+builder.Services.AddScoped<IAuthorizationHandler, MustBeQuestionAuthorHandler>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
@@ -38,6 +57,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

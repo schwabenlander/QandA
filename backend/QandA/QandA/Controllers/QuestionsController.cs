@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace QandA.Controllers;
 
@@ -41,13 +41,13 @@ public class QuestionsController : ControllerBase
     }
 
     [HttpGet("{questionId}")]
-    public ActionResult<QuestionGetSingleResponse> GetQuestion(int questionId)
+    public async Task<ActionResult<QuestionGetSingleResponse>> GetQuestion(int questionId)
     {
         var question = _questionCache.Get(questionId);
 
         if (question == null)
         {
-            question = _dataRepository.GetQuestion(questionId);
+            question = await _dataRepository.GetQuestionAsync(questionId);
 
             if (question == null)
                 return NotFound();
@@ -58,6 +58,7 @@ public class QuestionsController : ControllerBase
         return question;
     }
 
+    [Authorize]
     [HttpPost]
     public ActionResult<QuestionGetSingleResponse> PostQuestion(QuestionPostRequest questionPostRequest)
     {
@@ -76,6 +77,7 @@ public class QuestionsController : ControllerBase
             savedQuestion);
     }
 
+    [Authorize(Policy = "MustBeQuestionAuthor")]
     [HttpPut("{questionId}")]
     public ActionResult<QuestionGetSingleResponse> PutQuestion(int questionId, QuestionPutRequest questionPutRequest)
     {
@@ -96,6 +98,7 @@ public class QuestionsController : ControllerBase
         return savedQuestion;
     }
 
+    [Authorize(Policy = "MustBeQuestionAuthor")]
     [HttpDelete("{questionId}")]
     public ActionResult DeleteQuestion(int questionId)
     {
@@ -111,6 +114,7 @@ public class QuestionsController : ControllerBase
         return NoContent();
     }
 
+    [Authorize]
     [HttpPost("answer")]
     public ActionResult<AnswerGetResponse> PostAnswer(AnswerPostRequest answerPostRequest)
     {

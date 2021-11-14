@@ -190,4 +190,23 @@ public class DataRepository : IDataRepository
         return await connection.QueryAsync<QuestionGetManyResponse>(
             @"EXEC dbo.Question_GetUnanswered");
     }
+
+    public async Task<QuestionGetSingleResponse> GetQuestionAsync(int questionId)
+    {
+        using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        using (GridReader results = await connection.QueryMultipleAsync(
+                    @"EXEC dbo.Question_GetSingle @QuestionId = @QuestionId; 
+                          EXEC dbo.Answer_Get_ByQuestionId @QuestionId = @QuestionId",
+                    new { QuestionId = questionId }))
+        {
+            var question = (await results.ReadAsync<QuestionGetSingleResponse>()).FirstOrDefault();
+            if (question != null)
+            {
+                question.Answers = (await results.ReadAsync<AnswerGetResponse>()).ToList();
+            }
+            return question;
+        }
+    }
 }

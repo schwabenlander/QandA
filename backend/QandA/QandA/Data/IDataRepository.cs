@@ -17,6 +17,8 @@ public interface IDataRepository
 
     QuestionGetSingleResponse GetQuestion(int questionId);
 
+    Task<QuestionGetSingleResponse> GetQuestionAsync(int questionId);
+
     bool QuestionExists(int questionId);
 
     AnswerGetResponse GetAnswer(int answerId);
