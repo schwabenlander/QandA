@@ -1,4 +1,5 @@
 using DbUp;
+using Microsoft.Extensions.Caching.Memory;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IDataRepository, DataRepository>();
+builder.Services.AddSingleton<IQuestionCache, QuestionCache>();
 
 var app = builder.Build();
 

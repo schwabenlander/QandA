@@ -8,10 +8,12 @@ namespace QandA.Controllers;
 public class QuestionsController : ControllerBase
 {
     private readonly IDataRepository _dataRepository;
+    private readonly IQuestionCache _questionCache;
 
-    public QuestionsController(IDataRepository dataRepository)
+    public QuestionsController(IDataRepository dataRepository, IQuestionCache questionCache)
     {
         _dataRepository = dataRepository;
+        _questionCache = questionCache;
     }
 
     [HttpGet]
@@ -41,11 +43,18 @@ public class QuestionsController : ControllerBase
     [HttpGet("{questionId}")]
     public ActionResult<QuestionGetSingleResponse> GetQuestion(int questionId)
     {
-        var question = _dataRepository.GetQuestion(questionId);
+        var question = _questionCache.Get(questionId);
 
         if (question == null)
-            return NotFound();
-        
+        {
+            question = _dataRepository.GetQuestion(questionId);
+
+            if (question == null)
+                return NotFound();
+
+            _questionCache.Set(question);
+        }
+
         return question;
     }
 
@@ -82,6 +91,8 @@ public class QuestionsController : ControllerBase
 
         var savedQuestion = _dataRepository.PutQuestion(questionId, questionPutRequest);
 
+        _questionCache.Remove(savedQuestion.QuestionId);
+
         return savedQuestion;
     }
 
@@ -95,11 +106,13 @@ public class QuestionsController : ControllerBase
 
         _dataRepository.DeleteQuestion(questionId);
 
+        _questionCache.Remove(questionId);
+
         return NoContent();
     }
 
     [HttpPost("answer")]
-    public ActionResult<AnswerGetResponse> PostQuestion(AnswerPostRequest answerPostRequest)
+    public ActionResult<AnswerGetResponse> PostAnswer(AnswerPostRequest answerPostRequest)
     {
         var questionExists = _dataRepository.QuestionExists(answerPostRequest.QuestionId.Value);
 
@@ -114,6 +127,8 @@ public class QuestionsController : ControllerBase
             UserName = "bob.test@test.com",
             Created = DateTime.UtcNow
         });
+
+        _questionCache.Remove(answerPostRequest.QuestionId.Value);
 
         return savedAnswer;
     }
