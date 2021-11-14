@@ -30,6 +30,11 @@ builder.Services.AddAuthorization(options =>
                     policy.Requirements.Add(new MustBeQuestionAuthorRequirement())));
 builder.Services.AddScoped<IAuthorizationHandler, MustBeQuestionAuthorHandler>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddCors(options => 
+    options.AddPolicy("CorsPolicy", bldr => 
+    bldr.AllowAnyMethod()
+        .AllowAnyHeader()
+        .WithOrigins(builder.Configuration["Frontend"])));
 
 var app = builder.Build();
 
@@ -56,7 +61,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 

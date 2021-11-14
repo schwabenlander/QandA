@@ -1,5 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
+using System.Net.Http;
+using System.Text.Json;
 
 namespace QandA.Controllers;
 
@@ -9,11 +13,40 @@ public class QuestionsController : ControllerBase
 {
     private readonly IDataRepository _dataRepository;
     private readonly IQuestionCache _questionCache;
+    private readonly IHttpClientFactory _clientFactory;
+    private readonly string _auth0UserInfo;
 
-    public QuestionsController(IDataRepository dataRepository, IQuestionCache questionCache)
+    public QuestionsController(IDataRepository dataRepository, 
+        IQuestionCache questionCache, 
+        IHttpClientFactory clientFactory, 
+        IConfiguration configuration)
     {
         _dataRepository = dataRepository;
         _questionCache = questionCache;
+        _clientFactory = clientFactory;
+        _auth0UserInfo = $"https://{configuration["Auth0:Domain"]}/userinfo";
+    }
+
+    private async Task<string> GetUserNameAsync()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, _auth0UserInfo);
+        request.Headers.Add("Authorization", Request.Headers["Authorization"].First());
+
+        var client = _clientFactory.CreateClient();
+
+        var response = await client.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var user = await response.Content.ReadFromJsonAsync<User>(new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            return user.Name;
+        }
+        else
+            return string.Empty;
     }
 
     [HttpGet]
@@ -60,15 +93,15 @@ public class QuestionsController : ControllerBase
 
     [Authorize]
     [HttpPost]
-    public ActionResult<QuestionGetSingleResponse> PostQuestion(QuestionPostRequest questionPostRequest)
+    public async Task<ActionResult<QuestionGetSingleResponse>> PostQuestion(QuestionPostRequest questionPostRequest)
     {
         var savedQuestion = _dataRepository.PostQuestion(
             new QuestionPostFullRequest()
             {
                 Title = questionPostRequest.Title,
                 Content = questionPostRequest.Content,
-                UserId = "1",
-                UserName = "bob.test@test.com",
+                UserId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
+                UserName = await GetUserNameAsync(),
                 Created = DateTime.UtcNow
             });
 
@@ -116,7 +149,7 @@ public class QuestionsController : ControllerBase
 
     [Authorize]
     [HttpPost("answer")]
-    public ActionResult<AnswerGetResponse> PostAnswer(AnswerPostRequest answerPostRequest)
+    public async Task<ActionResult<AnswerGetResponse>> PostAnswer(AnswerPostRequest answerPostRequest)
     {
         var questionExists = _dataRepository.QuestionExists(answerPostRequest.QuestionId.Value);
 
@@ -127,8 +160,8 @@ public class QuestionsController : ControllerBase
         {
             QuestionId = answerPostRequest.QuestionId.Value,
             Content = answerPostRequest.Content,
-            UserId = "1",
-            UserName = "bob.test@test.com",
+            UserId = User.FindFirst(ClaimTypes.NameIdentifier).Value,
+            UserName = await GetUserNameAsync(),
             Created = DateTime.UtcNow
         });
 
