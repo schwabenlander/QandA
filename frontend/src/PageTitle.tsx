@@ -6,7 +6,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const PageTile = ({ children }: Props) => (
+export const PageTitle = ({ children }: Props) => (
   <h2
     css={css`
       font-size: 16px;

@@ -1,24 +1,27 @@
 /** @jsxImportSource @emotion/react */
-import React from 'react';
-import { Provider } from 'react-redux';
-import { configureStore } from './Store';
-import { Header } from './Header';
-import { Homepage } from './Homepage';
 import { css } from '@emotion/react';
+import React from 'react';
+
+import { Header } from './Header';
+import { HomePage } from './HomePage';
+
 import { fontFamily, fontSize, gray2 } from './Styles';
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { SearchPage } from './SearchPage';
 import { SignInPage } from './SignInPage';
-import { QuestionPage } from './QuestionPage';
+import { SignOutPage } from './SignOutPage';
 import { NotFoundPage } from './NotFoundPage';
+import { QuestionPage } from './QuestionPage';
+
+import { AuthProvider } from './Auth';
+import { AuthorizedPage } from './AuthorizedPage';
 
 const AskPage = React.lazy(() => import('./AskPage'));
 
-const store = configureStore();
-
 function App() {
   return (
-    <Provider store={store}>
+    <AuthProvider>
       <BrowserRouter>
         <div
           css={css`
@@ -29,7 +32,7 @@ function App() {
         >
           <Header />
           <Routes>
-            <Route path="" element={<Homepage />} />
+            <Route path="" element={<HomePage />} />
             <Route path="search" element={<SearchPage />} />
             <Route
               path="ask"
@@ -46,17 +49,28 @@ function App() {
                     </div>
                   }
                 >
-                  <AskPage />
+                  <AuthorizedPage>
+                    <AskPage />
+                  </AuthorizedPage>
                 </React.Suspense>
               }
             />
-            <Route path="signin" element={<SignInPage />} />
-            <Route path="questions/:questionId" element={<QuestionPage />} />
+            <Route path="signin" element={<SignInPage action="signin" />} />
+            <Route
+              path="/signin-callback"
+              element={<SignInPage action="signin-callback" />}
+            />
+            <Route path="signout" element={<SignOutPage action="signout" />} />
+            <Route
+              path="/signout-callback"
+              element={<SignOutPage action="signout-callback" />}
+            />
             <Route path="*" element={<NotFoundPage />} />
+            <Route path="questions/:questionId" element={<QuestionPage />} />
           </Routes>
         </div>
       </BrowserRouter>
-    </Provider>
+    </AuthProvider>
   );
 }
 

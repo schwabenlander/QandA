@@ -20,11 +20,13 @@ type FormData = {
 };
 
 export const AskPage = () => {
+  const [successfullySubmitted, setSuccessfullySubmitted] =
+    React.useState(false);
+
   const { register, errors, handleSubmit, formState } = useForm<FormData>({
     mode: 'onBlur',
   });
-  const [successfullySubmitted, setSuccessfullySubmitted] =
-    React.useState(false);
+
   const submitForm = async (data: FormData) => {
     const result = await postQuestion({
       title: data.title,
@@ -51,7 +53,7 @@ export const AskPage = () => {
               })}
             />
             {errors.title && errors.title.type === 'required' && (
-              <FieldError>You must enter the question title</FieldError>
+              <FieldError>Your must enter the question title</FieldError>
             )}
             {errors.title && errors.title.type === 'minLength' && (
               <FieldError>The title must be at least 10 characters</FieldError>
@@ -68,7 +70,7 @@ export const AskPage = () => {
               })}
             />
             {errors.content && errors.content.type === 'required' && (
-              <FieldError>You must enter the question content</FieldError>
+              <FieldError>Your must enter the question content</FieldError>
             )}
             {errors.content && errors.content.type === 'minLength' && (
               <FieldError>
