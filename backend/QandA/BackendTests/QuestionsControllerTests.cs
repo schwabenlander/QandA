@@ -85,4 +85,65 @@ public class QuestionsControllerTests
         Assert.Single(result);
         mockDataRepository.Verify(mock => mock.GetQuestionsBySearchWithPaging("Test", 1, 20), Times.Once);
     }
+
+    [Fact]
+    public async void GetQuestion_WhenQuestionNotFound_Returns404()
+    {
+        var mockDataRepository = new Mock<IDataRepository>();
+        mockDataRepository.Setup(repo => repo.GetQuestionAsync(1))
+            .Returns(() => Task.FromResult(default(QuestionGetSingleResponse)));
+
+        var mockQuestionCache = new Mock<IQuestionCache>();
+        mockQuestionCache.Setup(cache => cache.Get(1))
+            .Returns(() => null);
+
+        var mockConfigurationRoot = new Mock<IConfigurationRoot>();
+        mockConfigurationRoot.SetupGet(config =>
+            config[It.IsAny<string>()]).Returns("some setting");
+
+        var questionsController = new QuestionsController(
+            mockDataRepository.Object,
+            mockQuestionCache.Object,
+            null,
+            mockConfigurationRoot.Object);
+
+        var result = await questionsController.GetQuestion(1);
+
+        var actionResult = Assert.IsType<ActionResult<QuestionGetSingleResponse>>(result);
+        Assert.IsType<NotFoundResult>(actionResult.Result);
+    }
+
+    [Fact]
+    public async void GetQuestion_WhenQuestionIsFound_ReturnsQuestion()
+    {
+        var mockQuestion = new QuestionGetSingleResponse
+        {
+            QuestionId = 1,
+            Title = "Test"
+        };
+
+        var mockDataRepository = new Mock<IDataRepository>();
+        mockDataRepository.Setup(repo => repo.GetQuestionAsync(1))
+            .Returns(() => Task.FromResult(mockQuestion));
+
+        var mockQuestionCache = new Mock<IQuestionCache>();
+        mockQuestionCache.Setup(cache => cache.Get(1))
+            .Returns(() => mockQuestion);
+
+        var mockConfigurationRoot = new Mock<IConfigurationRoot>();
+        mockConfigurationRoot.SetupGet(config =>
+            config[It.IsAny<string>()]).Returns("some setting");
+
+        var questionsController = new QuestionsController(
+            mockDataRepository.Object,
+            mockQuestionCache.Object,
+            null,
+            mockConfigurationRoot.Object);
+
+        var result = await questionsController.GetQuestion(1);
+
+        var actionResult = Assert.IsType<ActionResult<QuestionGetSingleResponse>>(result);
+        var questionResult = Assert.IsType<QuestionGetSingleResponse>(actionResult.Value);
+        Assert.Equal(1, questionResult.QuestionId);
+    }
 }
